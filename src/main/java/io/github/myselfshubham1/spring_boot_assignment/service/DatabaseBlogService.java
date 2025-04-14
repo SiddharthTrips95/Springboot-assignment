@@ -1,31 +1,51 @@
 package io.github.myselfshubham1.spring_boot_assignment.service;
 
+import io.github.myselfshubham1.spring_boot_assignment.exceptions.ProductNotFoundException;
 import io.github.myselfshubham1.spring_boot_assignment.model.Blog;
 import io.github.myselfshubham1.spring_boot_assignment.repository.BlogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * implementation of blog service
+ */
+
+
 @Service
 public class DatabaseBlogService implements BlogService {
 
 
+    @Autowired
     public BlogRepository blogRepository;
+
 
     public DatabaseBlogService(BlogRepository blogRepository) {
         this.blogRepository = blogRepository;
     }
 
+    /**
+     * full body function to create blog
+     */
 
     @Override
     public Blog createBlog(Blog blog) {
         return blogRepository.save(blog);    }
 
+    /**
+     * full body function to get all  blogs
+     */
+
     @Override
     public List<Blog> getAllBlogs() {
         return blogRepository.findAll();
     }
+
+    /**
+     * full body function to get blog by ID
+     */
 
     @Override
     public Blog getBlogById(long id) {
@@ -33,22 +53,32 @@ public class DatabaseBlogService implements BlogService {
     }
 
 
+    /**
+     * full body function to update  blog
+     */
+
+
 
     @Override
-    public Blog updateBlog(long id, String name) {
-        Blog blog = getBlogById(id);  // Retrieve the blog by ID
-        blog.setTitle(name);  // Update the title
-        blog.setUpdatedAt(LocalDateTime.now());  // Update the updated timestamp
-        return blogRepository.save(blog);
+    public Blog updateBlog(long id, Blog blog) {
+        if (blog.getId() != id) {
+            throw new ProductNotFoundException("Product not found with ID: " + id);
+        }
+
+        Blog updatedBlog = blogRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Blog with id " + id + " not found"));
+
+        updatedBlog.setTitle(blog.getTitle());
+        updatedBlog.setDescription(blog.getDescription());
+        updatedBlog.setUpdatedAt(blog.getUpdatedAt());
+
+        return blogRepository.save(updatedBlog);
     }
 
-    @Override
-    public Blog updateBlogDescription(long id, String newDescription) {
-        Blog blog = getBlogById(id);  // Retrieve the blog by ID
-        blog.setDescription(newDescription);  // Update the description
-        blog.setUpdatedAt(LocalDateTime.now());  // Update the updated timestamp
-        return blogRepository.save(blog);
-    }
+    /**
+     * full body function to delete blog
+     */
+
 
     @Override
     public boolean deleteBlog(long id) {

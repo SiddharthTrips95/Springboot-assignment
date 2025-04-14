@@ -40,6 +40,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteUser(Long id) {
         userRepository.deleteById(id);
-        return false;
+        return true;
     }
 }
